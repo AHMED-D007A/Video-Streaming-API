@@ -4,6 +4,8 @@ psql
 -- CREATE DATABASE videostreaming;
 -- CREATE USER videouser WITH PASSWORD 'password';
 -- GRANT ALL PRIVILEGES ON DATABASE videostreaming TO videouser;
+-- GRANT USAGE ON SCHEMA public TO videouser;
+-- GRANT CREATE ON SCHEMA public TO videouser;
 
 Set Up Connection Parameters
 Edit the PostgreSQL configuration to allow connections:
