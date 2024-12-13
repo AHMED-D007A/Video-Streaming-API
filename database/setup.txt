@@ -1,0 +1,19 @@
+sudo -i -u postgres
+psql
+
+-- CREATE DATABASE videostreaming;
+-- CREATE USER videouser WITH PASSWORD 'password';
+-- GRANT ALL PRIVILEGES ON DATABASE videostreaming TO videouser;
+
+Set Up Connection Parameters
+Edit the PostgreSQL configuration to allow connections:
+
+Open pg_hba.conf:
+sudo nano /etc/postgresql/<version>/main/pg_hba.conf
+Replace <version> with your PostgreSQL version (e.g., 14).
+
+Add or modify this line to allow local connections:
+host    all             all             127.0.0.1/32            md5
+
+Reload PostgreSQL to apply changes:
+sudo systemctl reload postgresql
