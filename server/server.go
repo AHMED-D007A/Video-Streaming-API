@@ -20,9 +20,11 @@ func NewServer(addr string, db *sql.DB) *Server {
 func (s *Server) Start() error {
 	router := mux.NewRouter()
 
-	// subRouter := router.PathPrefix("api/v1/").Subrouter()
+	authRouter := router.PathPrefix("api/v1/").Subrouter()
 
 	router.Use(LogMW)
+
+	RegisterAuthenticationRoutes(authRouter, s.db)
 
 	log.Println("Starting server on:", s.addr[1:])
 	return http.ListenAndServe(s.addr, router)

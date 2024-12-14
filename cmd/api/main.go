@@ -14,7 +14,7 @@ func main() {
 	db := database.NewDBConnection(connStr)
 	defer db.Close()
 
-	server := server.NewServer(":8080", nil)
+	server := server.NewServer(":8080", db)
 
 	if err := server.Start(); err != nil {
 		panic(err)
