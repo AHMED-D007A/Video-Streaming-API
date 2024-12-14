@@ -20,7 +20,7 @@ func NewServer(addr string, db *sql.DB) *Server {
 func (s *Server) Start() error {
 	router := mux.NewRouter()
 
-	authRouter := router.PathPrefix("api/v1/").Subrouter()
+	authRouter := router.PathPrefix("/api/v1/").Subrouter()
 
 	router.Use(LogMW)
 
