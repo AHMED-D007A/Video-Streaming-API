@@ -1,6 +1,9 @@
 package authentication
 
-import "database/sql"
+import (
+	"database/sql"
+	"errors"
+)
 
 type AuthStorage struct {
 	db *sql.DB
@@ -22,5 +25,22 @@ func (s *AuthStorage) Register(user *UserPayload) error {
 	return nil
 }
 
-func (s *AuthStorage) Verify() {
+func (s *AuthStorage) Verify(userpayload *UserPayload) (User, error) {
+	var user User
+	query := "SELECT * FROM users WHERE email=$1"
+	result, err := s.db.Query(query, userpayload.Email)
+	if err != nil {
+		return User{}, err
+	}
+
+	if result.Next() {
+		err = result.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+		if err != nil {
+			return User{}, err
+		}
+	} else {
+		return User{}, errors.New("not Found")
+	}
+
+	return user, nil
 }

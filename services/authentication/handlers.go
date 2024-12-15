@@ -59,4 +59,42 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 
 // Login is a handler function that logs in a user
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var userpayload UserPayload
+	err := json.NewDecoder(r.Body).Decode(&userpayload)
+	if err != nil {
+		log.Print(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	user, err := h.storage.Verify(&userpayload)
+	if err != nil {
+		log.Print(err.Error())
+		if err.Error() == "not Found" {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("This Email is Not Registered"))
+			return
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword(user.Password, userpayload.Password)
+	if err != nil {
+		w.Write([]byte("The email or the password are wrong."))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	token, err := utils.CreateToken(userpayload.Name, userpayload.Email)
+	if err != nil {
+		log.Print(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response := fmt.Sprintf("{\"token\": \"%v\"}", token)
+
+	w.Write([]byte(response))
 }
