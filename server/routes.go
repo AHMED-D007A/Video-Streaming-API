@@ -14,3 +14,7 @@ func RegisterAuthenticationRoutes(router *mux.Router, db *sql.DB) {
 	router.HandleFunc("/signup", authHandler.Signup).Methods("POST")
 	router.HandleFunc("/login", authHandler.Login).Methods("POST")
 }
+
+func RegisterUploadRoutes(router *mux.Router, db *sql.DB) {
+	router.HandleFunc("/videos/upload", nil).Methods("POST")
+}
