@@ -1,4 +1,4 @@
-module Video-Streaming-Platform
+module Video-Streaming-API
 
 go 1.23.4
 

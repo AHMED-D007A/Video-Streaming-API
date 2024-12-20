@@ -1,8 +1,8 @@
 package server
 
 import (
-	"Video-Streaming-Platform/config"
-	"Video-Streaming-Platform/utils"
+	"Video-Streaming-API/config"
+	"Video-Streaming-API/utils"
 	"errors"
 	"log"
 	"net/http"

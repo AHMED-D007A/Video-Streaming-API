@@ -1,9 +1,9 @@
 package main
 
 import (
-	"Video-Streaming-Platform/config"
-	"Video-Streaming-Platform/database"
-	"Video-Streaming-Platform/server"
+	"Video-Streaming-API/config"
+	"Video-Streaming-API/database"
+	"Video-Streaming-API/server"
 	"fmt"
 )
 

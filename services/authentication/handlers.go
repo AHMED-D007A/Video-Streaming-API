@@ -1,7 +1,7 @@
 package authentication
 
 import (
-	"Video-Streaming-Platform/utils"
+	"Video-Streaming-API/utils"
 	"encoding/json"
 	"fmt"
 	"log"

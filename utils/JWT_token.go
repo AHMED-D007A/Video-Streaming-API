@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"Video-Streaming-Platform/config"
+	"Video-Streaming-API/config"
 	"errors"
 	"time"
 
