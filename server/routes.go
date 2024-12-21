@@ -2,7 +2,7 @@ package server
 
 import (
 	"Video-Streaming-API/services/authentication"
-	"Video-Streaming-API/services/uploading"
+	uploading "Video-Streaming-API/services/videoUploading"
 	"database/sql"
 
 	"github.com/gorilla/mux"
