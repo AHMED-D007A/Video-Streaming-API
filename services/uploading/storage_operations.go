@@ -15,10 +15,20 @@ func NewUploadStorage(db *sql.DB) *UploadStorage {
 	}
 }
 
-func (s *UploadStorage) StoreVideo(video *Video) error {
+func (s *UploadStorage) StoreVideo(video *Video) (int, error) {
 	query := `INSERT INTO videos (user_id, title, description, file_path, created_at, updated_at)
-              VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := s.db.Exec(query, video.UserID, video.Title, video.Description, video.FilePath, video.CreatedAt, video.UpdatedAt)
+              VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
+	var videoID int
+	err := s.db.QueryRow(query, video.UserID, video.Title, video.Description, video.FilePath, video.CreatedAt, video.UpdatedAt).Scan(&videoID)
+	if err != nil {
+		return 0, err
+	}
+	return videoID, nil
+}
+
+func (s *UploadStorage) UpdateVideoFilePath(videoID int, filePath string, thumbnailPath string) error {
+	query := `UPDATE videos SET file_path = $1, thumbnail_path = $2 WHERE id = $3`
+	_, err := s.db.Exec(query, filePath, thumbnailPath, videoID)
 	return err
 }
 

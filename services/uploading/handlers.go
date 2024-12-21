@@ -28,10 +28,6 @@ func (h *UploadHandler) UploadVideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Headers:", r.Header)
-	fmt.Println("Content-Type:", r.Header.Get("Content-Type"))
-	fmt.Println("Request Method:", r.Method)
-
 	// Max upload size is 1 GB
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<30)
 
@@ -51,38 +47,67 @@ func (h *UploadHandler) UploadVideo(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	// Create a directory for storing the uploaded files, named with the user ID
-	uploadDir := filepath.Join("./uploads", fmt.Sprintf("%d", userID))
-	if err := os.MkdirAll(uploadDir, os.ModePerm); err != nil {
+	// Get the file from the form
+	thumnail, thumnailHandler, err := r.FormFile("thumnail")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	// Store metadata in the database to get the video ID
+	video := &Video{
+		UserID:      userID,
+		Title:       r.FormValue("title"),
+		Description: r.FormValue("description"),
+		FilePath:    "", // Will be updated later
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	videoID, err := h.storage.StoreVideo(video)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Create a file on the server
-	filePath := filepath.Join(uploadDir, handler.Filename)
-	dst, err := os.Create(filePath)
+	// Create a directory named with the user ID and video ID
+	videoDir := filepath.Join("./uploads", fmt.Sprintf("%d", userID), fmt.Sprintf("%d", videoID))
+	if err := os.MkdirAll(videoDir, os.ModePerm); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Save the file to the new directory
+	finalFilePath := filepath.Join(videoDir, handler.Filename)
+	dst, err := os.Create(finalFilePath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer dst.Close()
 
-	// Copy the uploaded file to the server
 	if _, err := io.Copy(dst, file); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Store metadata in the database
-	video := &Video{
-		UserID:      userID,
-		Title:       r.FormValue("title"),
-		Description: r.FormValue("description"),
-		FilePath:    filePath,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
+	// Save the thumnail to the new directory
+	finalThumnailPath := filepath.Join(videoDir, thumnailHandler.Filename)
+	thumnailDST, err := os.Create(finalThumnailPath)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	if err := h.storage.StoreVideo(video); err != nil {
+	defer dst.Close()
+
+	if _, err := io.Copy(thumnailDST, thumnail); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Update the video file path in the database
+	video.FilePath = finalFilePath
+	if err := h.storage.UpdateVideoFilePath(videoID, finalFilePath, finalThumnailPath); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
