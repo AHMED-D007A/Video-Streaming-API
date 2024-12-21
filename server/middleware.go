@@ -3,6 +3,7 @@ package server
 import (
 	"Video-Streaming-API/config"
 	"Video-Streaming-API/utils"
+	"context"
 	"errors"
 	"log"
 	"net/http"
@@ -66,6 +67,16 @@ func AuthMW(next http.Handler) http.Handler {
 			w.Write([]byte(`{"error" : "invalid token"}`))
 			return
 		}
+
+		claims, ok := token.Claims.(*utils.CustomClaims)
+		if !ok {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(`{"error" : "invalid token"}`))
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), utils.EmailKey, claims.Email)
+		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
 	})

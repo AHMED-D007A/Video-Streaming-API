@@ -2,6 +2,7 @@ package server
 
 import (
 	"Video-Streaming-API/services/authentication"
+	"Video-Streaming-API/services/uploading"
 	"database/sql"
 
 	"github.com/gorilla/mux"
@@ -16,5 +17,8 @@ func RegisterAuthenticationRoutes(router *mux.Router, db *sql.DB) {
 }
 
 func RegisterUploadRoutes(router *mux.Router, db *sql.DB) {
-	router.HandleFunc("/videos/upload", nil).Methods("POST")
+	uploadStorage := uploading.NewUploadStorage(db)
+	uploadHandler := uploading.NewUploadHandler(uploadStorage)
+
+	router.HandleFunc("/videos/upload", uploadHandler.UploadVideo).Methods("POST")
 }
