@@ -7,6 +7,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type contextKey string
+
+const EmailKey contextKey = "email"
+
 type Config struct {
 	DB_HOST     string
 	DB_PORT     string

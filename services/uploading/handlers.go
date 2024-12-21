@@ -1,7 +1,7 @@
 package uploading
 
 import (
-	"Video-Streaming-API/utils"
+	"Video-Streaming-API/config"
 	"fmt"
 	"io"
 	"net/http"
@@ -21,7 +21,7 @@ func NewUploadHandler(storage *UploadStorage) *UploadHandler {
 }
 
 func (h *UploadHandler) UploadVideo(w http.ResponseWriter, r *http.Request) {
-	userEmail := r.Context().Value(utils.EmailKey).(string)
+	userEmail := r.Context().Value(config.EmailKey).(string)
 	userID, err := h.storage.GetUserIDByEmail(userEmail)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

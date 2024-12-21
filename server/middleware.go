@@ -75,7 +75,7 @@ func AuthMW(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), utils.EmailKey, claims.Email)
+		ctx := context.WithValue(r.Context(), config.EmailKey, claims.Email)
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
