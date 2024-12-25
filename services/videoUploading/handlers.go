@@ -1,7 +1,8 @@
-package uploading
+package videoUploading
 
 import (
 	"Video-Streaming-API/config"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -34,7 +35,6 @@ func (h *UploadHandler) UploadVideo(w http.ResponseWriter, r *http.Request) {
 	// Parse the multipart form
 	err = r.ParseMultipartForm(1 << 29) // 512 MB
 	if err != nil {
-		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -48,12 +48,12 @@ func (h *UploadHandler) UploadVideo(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	// Get the file from the form
-	thumnail, thumnailHandler, err := r.FormFile("thumnail")
+	thumnail, thumnailHandler, err := r.FormFile("thumbnail")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	defer file.Close()
+	defer thumnail.Close()
 
 	// Store metadata in the database to get the video ID
 	video := &Video{
@@ -98,7 +98,7 @@ func (h *UploadHandler) UploadVideo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer dst.Close()
+	defer thumnailDST.Close()
 
 	if _, err := io.Copy(thumnailDST, thumnail); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -113,5 +113,5 @@ func (h *UploadHandler) UploadVideo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("Video uploaded successfully"))
+	json.NewEncoder(w).Encode(map[string]string{"message": "Video uploaded successfully"})
 }

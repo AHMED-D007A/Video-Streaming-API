@@ -1,4 +1,4 @@
-package uploading
+package videoUploading
 
 import (
 	"database/sql"
