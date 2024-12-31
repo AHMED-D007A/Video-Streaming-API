@@ -44,7 +44,7 @@ func (h *VideoHandler) GetVideos(w http.ResponseWriter, r *http.Request) {
 	for i, video := range videos {
 		response = append(response, VideoResponse{
 			Video:     video,
-			Thumbnail: "/uploads/" + thumbnail_paths[i],
+			Thumbnail: "/api/v1/" + thumbnail_paths[i],
 		})
 	}
 
