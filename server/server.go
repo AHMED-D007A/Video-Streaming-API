@@ -33,7 +33,7 @@ func (s *Server) Start() error {
 	RegisterVideoManagementRoutes(videoManagementRouter, s.db)
 
 	// Serve the thumbnails from the "uploads" directory
-	router.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./"))))
+	router.PathPrefix("/api/v1/uploads/").Handler(http.StripPrefix("/api/v1/uploads/", http.FileServer(http.Dir("./uploads"))))
 
 	log.Println("Starting server on:", s.addr)
 	return http.ListenAndServe(s.addr, router)
