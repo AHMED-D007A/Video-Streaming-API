@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -105,13 +106,38 @@ func (h *UploadHandler) UploadVideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Transcode the video to multiple resolutions
+	err = TranscodeToMultipleResolutions(finalFilePath, videoDir)
+	if err != nil {
+		log.Printf("Error transcoding video: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Chunk the video into HLS segments
+	err = ChunkVideoToHLS(videoDir)
+	if err != nil {
+		log.Printf("Error chunking video to HLS: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Create the master playlist for adaptive bitrate streaming
+	err = CreateMasterPlaylist(videoDir)
+	if err != nil {
+		log.Printf("Error creating master playlist: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	// Update the video file path in the database
 	video.FilePath = finalFilePath
 	if err := h.storage.UpdateVideoFilePath(videoID, finalFilePath, finalThumnailPath); err != nil {
+		log.Printf("Error updating video file path: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Video uploaded successfully"})
+	json.NewEncoder(w).Encode(map[string]string{"message": "Video uploaded, transcoded, chunked, and master playlist created successfully"})
 }
