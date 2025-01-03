@@ -23,6 +23,7 @@ func (s *Server) Start() error {
 	authRouter := router.PathPrefix("/api/v1/").Subrouter()
 	uploadingRouter := router.PathPrefix("/api/v1/").Subrouter()
 	videoManagementRouter := router.PathPrefix("/api/v1/").Subrouter()
+	streamingRouter := router.PathPrefix("/api/v1/").Subrouter()
 
 	router.Use(LogMW)
 	uploadingRouter.Use(AuthMW)
@@ -31,9 +32,10 @@ func (s *Server) Start() error {
 	RegisterAuthenticationRoutes(authRouter, s.db)
 	RegisterUploadRoutes(uploadingRouter, s.db)
 	RegisterVideoManagementRoutes(videoManagementRouter, s.db)
+	RegisterStreamingRoutes(streamingRouter, s.db)
 
 	// Serve the thumbnails from the "uploads" directory
-	router.PathPrefix("/api/v1/uploads/").Handler(http.StripPrefix("/api/v1/uploads/", http.FileServer(http.Dir("./uploads"))))
+	router.PathPrefix("/api/v1/").Handler(http.StripPrefix("/api/v1/", http.FileServer(http.Dir("./"))))
 
 	log.Println("Starting server on:", s.addr)
 	return http.ListenAndServe(s.addr, router)

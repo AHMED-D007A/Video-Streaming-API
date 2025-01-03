@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Video Streaming</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+  <video id="video" controls style="height: 50%; width: 50%;"></video>
+  <div>
+    <label for="resolution">Choose resolution:</label>
+    <select id="resolution">
+      <option value="adaptive">Adaptive</option>
+      <option value="720">720p</option>
+      <option value="480">480p</option>
+      <option value="360">360p</option>
+    </select>
+  </div>
+  <script>
+    var video = document.getElementById('video');
+    var resolutionSelect = document.getElementById('resolution');
+    var videoID = 9; // Replace with the actual video ID
+    var hls = new Hls();
+
+    function loadVideo(resolution) {
+      var videoSrc;
+      if (resolution === 'adaptive') {
+        videoSrc = `http://localhost:8080/api/v1/stream/${videoID}/master.m3u8`;
+      } else {
+        videoSrc = `http://localhost:8080/api/v1/stream/${videoID}/output_${resolution}p.m3u8`;
+      }
+
+      if (Hls.isSupported()) {
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          video.play();
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoSrc;
+        video.addEventListener('loadedmetadata', function () {
+          video.play();
+        });
+      }
+    }
+
+    // Load the default resolution or adaptive streaming
+    var savedResolution = localStorage.getItem('selectedResolution');
+    if (savedResolution) {
+      resolutionSelect.value = savedResolution;
+      loadVideo(savedResolution);
+    } else {
+      loadVideo('adaptive');
+    }
+
+    // Change resolution when the user selects a different option
+    resolutionSelect.addEventListener('change', function () {
+      var selectedResolution = resolutionSelect.value;
+      loadVideo(selectedResolution);
+      localStorage.setItem('selectedResolution', selectedResolution);
+    });
+  </script>
+</body>
+</html>
